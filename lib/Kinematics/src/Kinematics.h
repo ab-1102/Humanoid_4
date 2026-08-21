@@ -4,11 +4,28 @@
 #include <Arduino.h>
 #include <Joint.h>
 
-struct Point {
+struct Point : public Printable{
   float x;
   float y;
   float z;
-};
+
+  Point(float xVal, float yVal, float zVal) : x(xVal), y(yVal),z(zVal) {}
+
+  size_t printTo(Print& p) const override {
+    size_t bytesWritten = 0;
+    
+    bytesWritten += p.print("(");
+    bytesWritten += p.print(x);
+    bytesWritten += p.print(",");
+    bytesWritten += p.print(y);
+    bytesWritten += p.print(",");
+    bytesWritten += p.print(z);
+    bytesWritten += p.print(")");
+    
+    return bytesWritten;
+  }
+};  
+
 
 class body {
 private:
@@ -37,21 +54,21 @@ private:
   const int rightAnklePin = 4, rightAnkleNormal = 92, rightAnkleMin = -15, rightAnkleMax = 30;
   const int leftAnklePin = 5, leftAnkleNormal = 82, leftAnkleMin = -15, leftAnkleMax = 30;
   
-  String rightKneeName = "Right Knee",
-    leftKneeName = "Left Knee",
-    rightFootName = "Right Foot",
-    leftFootName = "Left Foot",
-    rightHipName = "Right Hip",
-    leftHipName = "Left Hip",
-    hipName = "Hip",
-    leftShoulderAName = "Left Shoulder A",
-    rightShoulderAName = "Right Shoulder A",
-    leftShoulderBName = "Left Shoulder B",
-    rightShoulderBName = "Right Shoulder B",
-    leftElbowName = "Left Elbow",
-    rightElbowName = "Right Elbow",
-    leftAnkleName = "Left Ankle",
-    rightAnkleName = "Right Ankle";
+  String rightKneeName = "RK";
+  String leftKneeName = "LK";
+  String rightFootName = "RF";
+  String leftFootName = "LF";
+  String rightHipName = "RH";
+  String leftHipName = "LH";
+  String hipName = "Hip";
+  String leftShoulderAName = "LSA";
+  String rightShoulderAName = "RSA";
+  String leftShoulderBName = "LSB";
+  String rightShoulderBName = "RSB";
+  String leftElbowName = "LE";
+  String rightElbowName = "LE";
+  String leftAnkleName = "LA";
+  String rightAnkleName = "RA";
 
   joint right_knee; 
   joint left_knee; 
@@ -81,6 +98,7 @@ private:
  
 
   bool IK_CalAngle(Point p, float &theta, float &alpha, float &gamma) {
+    // theta=knee alpha=foot gamma=hip
     float X = p.x;
     float Y = p.y;
     float Z = p.z;
@@ -108,7 +126,7 @@ private:
   }
   
   Point FK_CalPoint(float theta, float alpha, float gamma) {
-    Point P;
+    Point P(0,0,0);
     float thetaRad = radians(theta);
     float alphaRad = radians(alpha);
     float gammaRad = radians(gamma);
@@ -141,9 +159,9 @@ private:
       return false;
     } 
     float ankleAngle = hipAngle;
-    if (outLimitsR(kneeAngle, footAngle, hipAngle, ankleAngle)) {
-      return false;
-    }
+    // if (outLimitsR(kneeAngle, footAngle, hipAngle, ankleAngle)) {
+    //   return false;
+    // }
     if (!right_knee.setJointAngle(kneeAngle) || !right_foot.setJointAngle(footAngle) || !right_hip.setJointAngle(hipAngle) || !right_ankle.setJointAngle(ankleAngle)){
       return false;
     }
@@ -159,9 +177,9 @@ private:
       return false;
     }
     float ankleAngle = hipAngle;
-    if (outLimitsL(kneeAngle, footAngle, hipAngle, ankleAngle)) {
-      return false;
-    }
+    // if (outLimitsL(kneeAngle, footAngle, hipAngle, ankleAngle)) {
+    //   return false;
+    // }
     if (!left_knee.setJointAngle(kneeAngle) || !left_foot.setJointAngle(footAngle) || !left_hip.setJointAngle(hipAngle) || !left_ankle.setJointAngle(ankleAngle)){
       return false;
     }
@@ -238,9 +256,9 @@ public:
     left_shoulderB.setJointAngle(90);
     right_shoulderB.setJointAngle(90);
 
-    Point A;
-    Point B;
-    Point C;
+    Point A(0,0,0);
+    Point B(0,0,0);
+    Point C(0,0,0);
 
     if (motion == 'F') {
       A = {0, 0, 85};
@@ -392,8 +410,8 @@ public:
     Point Lt = LeftFoot;
     Point Rs = getRightFoot();
     Point Ls = getLeftFoot();
-    Point Rd;
-    Point Ld;
+    Point Rd(0,0,0);
+    Point Ld(0,0,0);
     float rTheta, lTheta, rAlpha, lAlpha, rGamma, lGamma;
 
     unsigned long startTime = millis();
@@ -470,5 +488,26 @@ public:
     Point P = FK_CalPoint(left_knee.getJointAngle(), left_foot.getJointAngle(), left_hip.getJointAngle());
     return P;
   }
+
+  void printAngles() {
+    Serial.print("RH=");
+    Serial.print(right_hip.getJointAngle());
+    Serial.print(" LH=");
+    Serial.println(left_hip.getJointAngle());
+    Serial.print(" RK=");
+    Serial.print(right_knee.getJointAngle());
+    Serial.print(" LK=");
+    Serial.println(left_knee.getJointAngle());
+    Serial.print(" RF=");
+    Serial.print(right_foot.getJointAngle());
+    Serial.print(" LF=");
+    Serial.println(left_foot.getJointAngle());
+    Serial.print(" RA=");
+    Serial.print(right_ankle.getJointAngle());
+    Serial.print(" LA=");
+    Serial.println(left_ankle.getJointAngle());
+        
+  }
 };
+
 #endif

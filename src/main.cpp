@@ -55,8 +55,8 @@ int8_t findJoint(const char* target) {
   return -1;
 }
 
-Point rf = {0,0,0};
-Point lf = {0,0,0};
+Point rf(0,0,0);
+Point lf(0,0,0);
 
 void executeCommand(const char* action,
                     const char* target,
@@ -155,36 +155,19 @@ void executeCommand(const char* action,
     else{
       Serial.println("Failed to set foots");
     }
-    Serial.print("Target RF:(");
-    Serial.print(rf.x);
-    Serial.print(",");
-    Serial.print(rf.y);
-    Serial.print(",");
-    Serial.print(rf.z);
-    Serial.print(")  LF: (");
-    Serial.print(lf.x);
-    Serial.print(",");
-    Serial.print(lf.y);
-    Serial.print(",");
-    Serial.print(lf.z);
-    Serial.println(")");
+
+    Serial.print("Target RF:");
+    Serial.print(rf);
+    Serial.print(" LF:");
+    Serial.println(lf);
 
     rf = humanoid.getRightFoot();
     lf = humanoid.getLeftFoot();
 
-    Serial.print("Current RF:(");
-    Serial.print(rf.x);
-    Serial.print(",");
-    Serial.print(rf.y);
-    Serial.print(",");
-    Serial.print(rf.z);
-    Serial.print(")  LF: (");
-    Serial.print(lf.x);
-    Serial.print(",");
-    Serial.print(lf.y);
-    Serial.print(",");
-    Serial.print(lf.z);
-    Serial.println(")");
+    Serial.print("Current RF:");
+    Serial.print(rf);
+    Serial.print(" LF:");
+    Serial.println(lf);
     Serial.println("END");
     return;
 

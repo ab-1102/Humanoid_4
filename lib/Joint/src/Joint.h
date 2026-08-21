@@ -46,12 +46,23 @@ public:
   bool setJointAngle(float targetJointAngle) {
     if (targetJointAngle > maxAngle) {
       currentJointAngle = maxAngle;
+      Serial.print(name);
+      Serial.print(" Limited to = ");
+      Serial.println(currentJointAngle);
     }
     else if (targetJointAngle < minAngle) {
       currentJointAngle = minAngle;
+      Serial.print(name);
+      Serial.print(" Limited to = ");
+      Serial.println(currentJointAngle);
+    }
+    else {
+      currentJointAngle = targetJointAngle;
+      Serial.print(name);
+      Serial.print(" Set to = ");
+      Serial.println(currentJointAngle);
     }
     
-    currentJointAngle = targetJointAngle;
     if (!flip) {
       currentServoAngle =  normalServoAngle + currentJointAngle;
     }
@@ -78,14 +89,16 @@ public:
 
   bool outLimit(float angle) {
     if (angle < minAngle) {
-      Serial.print(name);
+      String n = name + " Joint";
+      Serial.print(n);
       Serial.println(" MinAngle HIT");
-      return true;
+      return false; // temp
     }
     if (angle > maxAngle) {
-      Serial.print(name);
+      String n = name + " Joint";
+      Serial.print(n);
       Serial.println(" MaxAngle HIT");
-      return true;
+      return false; // temp
     }
     return false;
   }
