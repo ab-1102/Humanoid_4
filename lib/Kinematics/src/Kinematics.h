@@ -125,18 +125,6 @@ private:
     return true;
   }
   
-  Point FK_CalPoint(float theta, float alpha, float gamma) {
-    Point P(0,0,0);
-    float thetaRad = radians(theta);
-    float alphaRad = radians(alpha);
-    float gammaRad = radians(gamma);
-    float Zl = (L * (cos(thetaRad) + cos(alphaRad))) + K;
-    P.x = L * (sin(thetaRad) - sin(alphaRad));
-    P.y = Zl * sin(gammaRad);
-    P.z = Zl * cos(gammaRad);  
-    return P;
-  }
-
   bool outLimitsR(float kneeAngle, float footAngle, float hipAngle, float ankleAngle) {
     if (right_hip.outLimit(hipAngle) || right_knee.outLimit(kneeAngle) || right_foot.outLimit(footAngle) || right_ankle.outLimit(ankleAngle)) {
       return true;
@@ -477,6 +465,18 @@ public:
     }
     Serial.println("setRightFoot failed");
     return false;
+  }
+
+  Point FK_CalPoint(float theta, float alpha, float gamma) {
+    Point P(0,0,0);
+    float thetaRad = radians(theta);
+    float alphaRad = radians(alpha);
+    float gammaRad = radians(gamma);
+    float Zl = (L * (cos(thetaRad) + cos(alphaRad))) + K;
+    P.x = L * (sin(thetaRad) - sin(alphaRad));
+    P.y = Zl * sin(gammaRad);
+    P.z = Zl * cos(gammaRad);  
+    return P;
   }
 
   Point getRightFoot() {

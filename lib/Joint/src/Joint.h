@@ -47,13 +47,17 @@ public:
     if (targetJointAngle > maxAngle) {
       currentJointAngle = maxAngle;
       Serial.print(name);
-      Serial.print(" Limited to = ");
+      Serial.print(" Limited from ");
+      Serial.print(targetJointAngle);
+      Serial.print(" to = ");
       Serial.println(currentJointAngle);
     }
     else if (targetJointAngle < minAngle) {
       currentJointAngle = minAngle;
       Serial.print(name);
-      Serial.print(" Limited to = ");
+      Serial.print(" Limited from ");
+      Serial.print(targetJointAngle);
+      Serial.print(" to = ");
       Serial.println(currentJointAngle);
     }
     else {

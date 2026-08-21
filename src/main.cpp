@@ -88,15 +88,15 @@ void executeCommand(const char* action,
   // EX = Execute / send all angles
   if (action[0] == 'E' && action[1] == 'X') {
 
-    Serial.print("ANGLES:");
+    // Serial.print("ANGLES:");
 
-    for (uint8_t i = 0; i < NUM_JOINTS; i++) {
+    // for (uint8_t i = 0; i < NUM_JOINTS; i++) {
 
-      Serial.print(' ');
-      Serial.print(JOINTS[i]);
-      Serial.print('=');
-      Serial.print(angles[i]);
-    }
+    //   Serial.print(' ');
+    //   Serial.print(JOINTS[i]);
+    //   Serial.print('=');
+    //   Serial.print(angles[i]);
+    // }
 
     Serial.println();
 
@@ -105,19 +105,21 @@ void executeCommand(const char* action,
     rf = humanoid.getRightFoot();
     lf = humanoid.getLeftFoot();
 
-    Serial.print("RF:(");
-    Serial.print(rf.x);
-    Serial.print(",");
-    Serial.print(rf.y);
-    Serial.print(",");
-    Serial.print(rf.z);
-    Serial.print(")  LF: (");
-    Serial.print(lf.x);
-    Serial.print(",");
-    Serial.print(lf.y);
-    Serial.print(",");
-    Serial.print(lf.z);
-    Serial.println(")");
+    Serial.print("RF:");
+    Serial.print(rf);
+    Serial.print(" LF:");
+    Serial.println(lf);
+
+
+    rf = humanoid.FK_CalPoint(angles[3],angles[5],angles[1]);
+    lf = humanoid.FK_CalPoint(angles[4],angles[6],angles[2]);
+
+    Serial.print("RFT:");
+    Serial.print(rf);
+    Serial.print(" LFT:");
+    Serial.println(lf);
+
+
     Serial.println("END");
     return;
   }
@@ -172,6 +174,8 @@ void executeCommand(const char* action,
     return;
 
   }
+
+  
   Serial.print("ERROR: Unknown action ");
   Serial.println(action);
   Serial.println("END");
