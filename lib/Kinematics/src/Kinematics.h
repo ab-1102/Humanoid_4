@@ -34,7 +34,7 @@ private:
   const float K = 20.2f; // Knee Length
 
   const int rightKneePin = 9, rightKneeNormal = 92, rightKneeMin = -35, rightKneeMax = 35;
-  const int leftKneePin = 8, leftKneeNormal = 83, leftKneeMin = -35, leftKneeMax = 35;
+  const int leftKneePin = 8, leftKneeNormal = 68, leftKneeMin = -35, leftKneeMax = 35;
   const int rightFootPin = 7, rightFootNormal = 94, rightFootMin = -35, rightFootMax = 35;
   const int leftFootPin = 6, leftFootNormal = 100, leftFootMin = -35, leftFootMax = 35;
   

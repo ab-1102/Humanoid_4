@@ -179,7 +179,7 @@ void executeCommand(const char* action,
     int steps = round(angle);
     Serial.print("Walking Forward ");
     Serial.println(steps);
-    humanoid.walk(steps,3000);
+    humanoid.walk(steps,1500);
     return;
   }
   Serial.print("ERROR: Unknown action ");
