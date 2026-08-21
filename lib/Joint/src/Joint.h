@@ -46,25 +46,25 @@ public:
   bool setJointAngle(float targetJointAngle) {
     if (targetJointAngle > maxAngle) {
       currentJointAngle = maxAngle;
-      Serial.print(name);
-      Serial.print(" Limited from ");
-      Serial.print(targetJointAngle);
-      Serial.print(" to = ");
-      Serial.println(currentJointAngle);
+      // Serial.print(name);
+      // Serial.print(" Limited from ");
+      // Serial.print(targetJointAngle);
+      // Serial.print(" to = ");
+      // Serial.println(currentJointAngle);
     }
     else if (targetJointAngle < minAngle) {
       currentJointAngle = minAngle;
-      Serial.print(name);
-      Serial.print(" Limited from ");
-      Serial.print(targetJointAngle);
-      Serial.print(" to = ");
-      Serial.println(currentJointAngle);
+      // Serial.print(name);
+      // Serial.print(" Limited from ");
+      // Serial.print(targetJointAngle);
+      // Serial.print(" to = ");
+      // Serial.println(currentJointAngle);
     }
     else {
       currentJointAngle = targetJointAngle;
-      Serial.print(name);
-      Serial.print(" Set to = ");
-      Serial.println(currentJointAngle);
+      // Serial.print(name);
+      // Serial.print(" Set to = ");
+      // Serial.println(currentJointAngle);
     }
     
     if (!flip) {
@@ -94,14 +94,14 @@ public:
   bool outLimit(float angle) {
     if (angle < minAngle) {
       String n = name + " Joint";
-      Serial.print(n);
-      Serial.println(" MinAngle HIT");
+      // Serial.print(n);
+      // Serial.println(" MinAngle HIT");
       return false; // temp
     }
     if (angle > maxAngle) {
       String n = name + " Joint";
-      Serial.print(n);
-      Serial.println(" MaxAngle HIT");
+      // Serial.print(n);
+      // Serial.println(" MaxAngle HIT");
       return false; // temp
     }
     return false;

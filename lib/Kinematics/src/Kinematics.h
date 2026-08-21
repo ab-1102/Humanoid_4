@@ -143,7 +143,7 @@ private:
     float footAngle;
     float hipAngle;
     if (!IK_CalAngle(P, kneeAngle, footAngle, hipAngle)){
-      Serial.println("sRF-IK failed");
+      // Serial.println("sRF-IK failed");
       return false;
     } 
     float ankleAngle = hipAngle;
@@ -161,7 +161,7 @@ private:
     float footAngle;
     float hipAngle;
     if (!IK_CalAngle(P, kneeAngle, footAngle, hipAngle)){
-      Serial.println("sLF-IK failed");
+      // Serial.println("sLF-IK failed");
       return false;
     }
     float ankleAngle = hipAngle;
@@ -238,158 +238,41 @@ public:
     return true;
   }
 
-  bool walk(char motion, int cycles, unsigned long totalTime, int contactTime = 500) {
-    // A -t1> B -t2> C -t3> A
-
+  bool walk(int cycles, unsigned long totalTime) {
     left_shoulderB.setJointAngle(90);
     right_shoulderB.setJointAngle(90);
 
-    Point A(0,0,0);
-    Point B(0,0,0);
-    Point C(0,0,0);
-
-    if (motion == 'F') {
-      A = {0, 0, 85};
-      B = {5, 25, 110};
-      C = {-15, -25, 110};
-    }
-    else if (motion == 'B') {
-      A = {0, 0, 110};
-      B = {0, 25, 115};
-      C = {20, 25, 115};
-    }
-    else {
-      return false;
-    }
+    Point S(0,0,105);
+    Point Ar(0,41,110);
+    Point Al(0,-45,96.5);
+    Point B(-20,41,110);
+    Point C(-20,0,105);
+    Point D(-20,-45,96.5);
+    Point E(8,-45,96.5);
+    Point f(8,0,105);
+    Point G(8,41,110);
 
     int cycle = 0;
 
-    unsigned long t2 = contactTime;
-    unsigned long t1 = (totalTime - t2)/2;
-    unsigned long t3 = t1;
+    unsigned long t1 = totalTime;
+
     
-    statue(B, C, 2000);
+    statue(S, S, 2000);
+    statue(Ar, Al, 2000);
+
 
     for (cycle = 1; cycle <= cycles; cycle++) {
-      char rightLegStage = 'B';
-      setRightFoot(B);
-      Point rightLegPoint = B;
-      rightLegMovementDone = true;
-      char leftLegStage = 'C'; 
-      setLeftFoot(C);
-      Point leftLegPoint = C;
-      leftLegMovementDone = true;
-      bool cycleRunning = true;
-      unsigned long startTime = millis();
-      unsigned long AtB_StartingTimeR;
-      unsigned long BtC_StartingTimeR;
-      unsigned long CtA_StartingTimeR;
-      unsigned long AtB_StartingTimeL;
-      unsigned long BtC_StartingTimeL;
-      unsigned long CtA_StartingTimeL;
-
-      unsigned long AtB_DetlaTimeR;
-      unsigned long BtC_DetlaTimeR;
-      unsigned long CtA_DetlaTimeR;
-      unsigned long AtB_DetlaTimeL;
-      unsigned long BtC_DetlaTimeL;
-      unsigned long CtA_DetlaTimeL;
-
-      while (cycleRunning) {
-        unsigned long currentTime = millis();     
-
-        if (currentTime - startTime >= totalTime) {
-          cycleRunning = false;
-          break;
-        }
-        
-        if (rightLegStage == 'A') {
-          if (rightLegMovementDone) {
-            AtB_StartingTimeR = currentTime;
-            rightLegMovementDone = false;
-          }
-          AtB_DetlaTimeR = currentTime - AtB_StartingTimeR;
-          if (!getDeltaPoint(AtB_StartingTimeR, t1, AtB_DetlaTimeR, A, B, rightLegPoint)) {
-            setRightFoot(rightLegPoint);
-          }
-          else {
-            rightLegStage = 'B';
-            rightLegMovementDone = true;
-          }          
-        }
-        else if (rightLegStage == 'B') {
-          if (rightLegMovementDone) {
-            BtC_StartingTimeR = currentTime;
-            rightLegMovementDone = false;
-          }
-          BtC_DetlaTimeR = currentTime - BtC_StartingTimeR;
-          if (!getDeltaPoint(BtC_StartingTimeR, t2, BtC_DetlaTimeR, B, C, rightLegPoint)) {
-            setRightFoot(rightLegPoint);
-          }
-          else {
-            rightLegStage = 'C';
-            rightLegMovementDone = true;
-          }
-        }
-        else if (rightLegStage == 'C') {
-          if (rightLegMovementDone) {
-            CtA_StartingTimeR = currentTime;
-            rightLegMovementDone = false;
-          }
-          CtA_DetlaTimeR = currentTime - CtA_StartingTimeR;
-          if (!getDeltaPoint(CtA_StartingTimeR, t3, CtA_DetlaTimeR, C, A, rightLegPoint)) {
-            setRightFoot(rightLegPoint);
-          }
-          else {
-            rightLegStage = 'A';
-            rightLegMovementDone = true;
-          }
-        }
-        
-        if (leftLegStage == 'A') {
-          if (leftLegMovementDone) {
-            AtB_StartingTimeL = currentTime;
-            leftLegMovementDone = false;
-          }
-          AtB_DetlaTimeL = currentTime - AtB_StartingTimeL;
-          if (!getDeltaPoint(AtB_StartingTimeL, t1, AtB_DetlaTimeL, A, B, leftLegPoint)) {
-            setLeftFoot(leftLegPoint);
-          }
-          else {
-            leftLegStage = 'B';
-            leftLegMovementDone = true;
-          }
-        }
-        else if (leftLegStage == 'B') {
-          if (leftLegMovementDone) {
-            BtC_StartingTimeL = currentTime;
-            leftLegMovementDone = false;
-          }
-          BtC_DetlaTimeL = currentTime - BtC_StartingTimeL;
-          if (!getDeltaPoint(BtC_StartingTimeL, t2, BtC_DetlaTimeL, B, C, leftLegPoint)) {
-            setLeftFoot(leftLegPoint);
-          }
-          else {
-            leftLegStage = 'C';
-            leftLegMovementDone = true;
-          }
-        }
-        else if (leftLegStage == 'C') {
-          if (leftLegMovementDone) {
-            CtA_StartingTimeL = currentTime;
-            leftLegMovementDone = false;
-          }
-          CtA_DetlaTimeL = currentTime - CtA_StartingTimeL;
-          if (!getDeltaPoint(CtA_StartingTimeL, t3, CtA_DetlaTimeL, C, A, leftLegPoint)) {
-            setLeftFoot(leftLegPoint);
-          }
-          else {
-            leftLegStage = 'A';
-            leftLegMovementDone = true;
-          }
-        }
-      }
-    } 
+      statue(B,E,t1);
+      statue(C,f,t1);
+      statue(D,G,t1);
+      statue(E,B,t1);
+      statue(f,C,t1);
+      statue(G,D,t1);
+      Serial.print(cycle);
+      Serial.println(" Over");
+    }
+    statue(Ar, Al, 2000);
+    statue(S, S, 2000);
     return true;  
   }
 
@@ -460,10 +343,10 @@ public:
       if (setLeftFoot(L)) {
         return true;
       }
-      Serial.println("setLeftFoot failed");
+      // Serial.println("setLeftFoot failed");
       return false;
     }
-    Serial.println("setRightFoot failed");
+    // Serial.println("setRightFoot failed");
     return false;
   }
 
@@ -490,22 +373,22 @@ public:
   }
 
   void printAngles() {
-    Serial.print("RH=");
-    Serial.print(right_hip.getJointAngle());
-    Serial.print(" LH=");
-    Serial.println(left_hip.getJointAngle());
-    Serial.print(" RK=");
-    Serial.print(right_knee.getJointAngle());
-    Serial.print(" LK=");
-    Serial.println(left_knee.getJointAngle());
-    Serial.print(" RF=");
-    Serial.print(right_foot.getJointAngle());
-    Serial.print(" LF=");
-    Serial.println(left_foot.getJointAngle());
-    Serial.print(" RA=");
-    Serial.print(right_ankle.getJointAngle());
-    Serial.print(" LA=");
-    Serial.println(left_ankle.getJointAngle());
+    // Serial.print("RH=");
+    // Serial.print(right_hip.getJointAngle());
+    // Serial.print(" LH=");
+    // Serial.println(left_hip.getJointAngle());
+    // Serial.print(" RK=");
+    // Serial.print(right_knee.getJointAngle());
+    // Serial.print(" LK=");
+    // Serial.println(left_knee.getJointAngle());
+    // Serial.print(" RF=");
+    // Serial.print(right_foot.getJointAngle());
+    // Serial.print(" LF=");
+    // Serial.println(left_foot.getJointAngle());
+    // Serial.print(" RA=");
+    // Serial.print(right_ankle.getJointAngle());
+    // Serial.print(" LA=");
+    // Serial.println(left_ankle.getJointAngle());
         
   }
 };

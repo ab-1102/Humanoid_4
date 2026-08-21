@@ -175,7 +175,13 @@ void executeCommand(const char* action,
 
   }
 
-  
+  if (action[0] == 'W' && action[1] == 'F') {
+    int steps = round(angle);
+    Serial.print("Walking Forward ");
+    Serial.println(steps);
+    humanoid.walk(steps,3000);
+    return;
+  }
   Serial.print("ERROR: Unknown action ");
   Serial.println(action);
   Serial.println("END");
