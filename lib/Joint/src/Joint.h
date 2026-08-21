@@ -10,47 +10,16 @@ private:
   Servo servo;
   int pin; // Servo pin
   float normalServoAngle; // Angle of servo when joint is at 0
-  float targetAngle; // Servo angle
-
+  String name; // Joint name
   float minAngle; // Joint limits
   float maxAngle; // Joint limits
+  float currentServoAngle; // latest Servo angle
   float currentJointAngle; // latest Joint angle
-  bool flip = false; // true if +ve joint angle is less that 90 for servo angle.
+  bool flip = false; // servo flipping
 
   // Microsecond limits 
   const int MIN_PULSE = 544;
   const int MAX_PULSE = 2400;
-
-public:
-
-  joint(int p, int o, int min, int max, bool f) {
-    pin = p;
-    normalServoAngle = o;
-    minAngle = min;
-    maxAngle = max;
-    flip = f;
-  }  
-
-  void begin(int angle = 0) {
-    servo.attach(pin);
-    servo.write(normalServoAngle + angle);
-  }
-
-  float jointToServo(float jointAngle) {
-
-    if (jointAngle > maxAngle) {
-      jointAngle = maxAngle;
-    }
-    else if (jointAngle < minAngle) {
-      jointAngle = minAngle;
-      }
-    if (!flip) {
-      return normalServoAngle + jointAngle;
-    }
-    else {
-      return normalServoAngle - jointAngle;
-    }
-  }
 
   int degreeToMicro(float angle) {
     angle = constrain(angle, 0.0f, 180.0f);
@@ -58,15 +27,45 @@ public:
     return (int)(pulse + 0.5f);
   }
 
+public:
+
+  joint(int p, int o, int min, int max, bool f, String n = "") {
+    pin = p;
+    normalServoAngle = o;
+    minAngle = min;
+    maxAngle = max;
+    flip = f;
+    name = n;
+  }  
+
+  void begin(int angle = 0) {
+    servo.attach(pin);
+    servo.write(normalServoAngle + angle);
+  }
+
   bool setJointAngle(float targetJointAngle) {
-    targetAngle = targetJointAngle;
-    currentJointAngle = jointToServo(targetAngle);
-    servo.write(degreeToMicro(currentJointAngle));
+    if (targetJointAngle > maxAngle) {
+      currentJointAngle = maxAngle;
+    }
+    else if (targetJointAngle < minAngle) {
+      currentJointAngle = minAngle;
+    }
+    
+    currentJointAngle = targetJointAngle;
+    if (!flip) {
+      currentServoAngle =  normalServoAngle + currentJointAngle;
+    }
+    else {
+      currentServoAngle =  normalServoAngle - currentJointAngle;
+    }
+    servo.write(degreeToMicro(currentServoAngle));
     return true;
+    
+
   }
 
   float getJointAngle() {
-    return targetAngle;
+    return currentJointAngle;
   }
 
   float getServoAngle() {
@@ -75,6 +74,20 @@ public:
 
   int getPin() {
     return pin;
+  }
+
+  bool outLimit(float angle) {
+    if (angle < minAngle) {
+      Serial.print(name);
+      Serial.println(" MinAngle HIT");
+      return true;
+    }
+    if (angle > maxAngle) {
+      Serial.print(name);
+      Serial.println(" MaxAngle HIT");
+      return true;
+    }
+    return false;
   }
 };
 

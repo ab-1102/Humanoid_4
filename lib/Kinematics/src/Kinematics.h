@@ -16,26 +16,42 @@ private:
   const float L = 50.0f; // Link Length
   const float K = 20.2f; // Knee Length
 
-  const int rightKneePin = 9, rightKneeNormal = 92, rightKneeMin = -30, rightKneeMax = 30;
-  const int leftKneePin = 8, leftKneeNormal = 83, leftKneeMin = -30, leftKneeMax = 30;
-  const int rightFootPin = 7, rightFootNormal = 94, rightFootMin = -30, rightFootMax = 30;
-  const int leftFootPin = 6, leftFootNormal = 100, leftFootMin = -30, leftFootMax = 30;
-
-  const int rightHipPin = 11, rightHipNormal = 90, rightHipMin = -10, rightHipMax = 20;
-  const int leftHipPin = 10, leftHipNormal = 70, leftHipMin = -10, leftHipMax = 20;
+  const int rightKneePin = 9, rightKneeNormal = 92, rightKneeMin = -35, rightKneeMax = 35;
+  const int leftKneePin = 8, leftKneeNormal = 83, leftKneeMin = -35, leftKneeMax = 35;
+  const int rightFootPin = 7, rightFootNormal = 94, rightFootMin = -35, rightFootMax = 35;
+  const int leftFootPin = 6, leftFootNormal = 100, leftFootMin = -35, leftFootMax = 35;
+  
+  const int rightHipPin = 11, rightHipNormal = 90, rightHipMin = -25, rightHipMax = 15;
+  const int leftHipPin = 10, leftHipNormal = 70, leftHipMin = -25, leftHipMax = 15;
   const int HipPin = 12, HipNormal = 90, HipMin = -20, HipMax = 20;
   
   const int leftShoulderAPin = 14, leftShoulderANormal = 89, leftShoulderAMin = -90, leftShoulderAMax = 90;
   const int rightShoulderAPin = 15, rightShoulderANormal = 90, rightShoulderAMin = -90, rightShoulderAMax = 90;
-
+  
   const int rightShoulderBPin = 16, rightShoulderBNormal = 90, rightShoulderBMin = -90, rightShoulderBMax = 90;
   const int leftShoulderBPin = 17, leftShoulderBNormal = 91, leftShoulderBMin = -90, leftShoulderBMax = 90;
-
+  
   const int rightElbowPin = 18, rightElbowNormal = 90, rightElbowMin = -90, rightElbowMax = 90;
   const int leftElbowPin = 19, leftElbowNormal = 90, leftElbowMin = -90, leftElbowMax = 90;
-
-  const int rightAnklePin = 4, rightAnkleNormal = 92, rightAnkleMin = -10, rightAnkleMax = 20;
-  const int leftAnklePin = 5, leftAnkleNormal = 82, leftAnkleMin = -10, leftAnkleMax = 20;
+  
+  const int rightAnklePin = 4, rightAnkleNormal = 92, rightAnkleMin = -15, rightAnkleMax = 30;
+  const int leftAnklePin = 5, leftAnkleNormal = 82, leftAnkleMin = -15, leftAnkleMax = 30;
+  
+  String rightKneeName = "Right Knee",
+    leftKneeName = "Left Knee",
+    rightFootName = "Right Foot",
+    leftFootName = "Left Foot",
+    rightHipName = "Right Hip",
+    leftHipName = "Left Hip",
+    hipName = "Hip",
+    leftShoulderAName = "Left Shoulder A",
+    rightShoulderAName = "Right Shoulder A",
+    leftShoulderBName = "Left Shoulder B",
+    rightShoulderBName = "Right Shoulder B",
+    leftElbowName = "Left Elbow",
+    rightElbowName = "Right Elbow",
+    leftAnkleName = "Left Ankle",
+    rightAnkleName = "Right Ankle";
 
   joint right_knee; 
   joint left_knee; 
@@ -69,16 +85,15 @@ private:
     float Y = p.y;
     float Z = p.z;
 
-    float ZL = sqrt(( Z * Z ) + ( Y * Y ));
+    float Zl = sqrt(( Z * Z ) + ( Y * Y ));
 
-    float Leg = 50.0f; // Length of the leg segment
-    float Knee = 20.2f; // Length of the knee segment
+    float Leg = L; // Length of the leg segment
+    float Knee = K; // Length of the knee segment
     
-    float a = acos(( 0.5 * sqrt(X * X + ( ZL - Knee ) * ( ZL - Knee )) ) / Leg);
-    float b = atan(X / ( ZL - Knee ));
+    float a = acos(( 0.5 * sqrt(X * X + ( Zl - Knee ) * ( Zl - Knee )) ) / Leg);
+    float b = atan(X / ( Zl - Knee ));
 
     if (!isfinite(a) || !isfinite(b)) {
-      Serial.println("IK_CalAngle: Invalid angles calculated. Check the input point.");
       return false;
     }
 
@@ -87,20 +102,48 @@ private:
     gamma = degrees(atan(Y / Z));
 
     if (!isfinite(theta) || !isfinite(alpha) || !isfinite(gamma)) {
-      Serial.println("IK_CalAngle: Invalid joint angles calculated.");
       return false;
     }
     return true;
   }
   
+  Point FK_CalPoint(float theta, float alpha, float gamma) {
+    Point P;
+    float thetaRad = radians(theta);
+    float alphaRad = radians(alpha);
+    float gammaRad = radians(gamma);
+    float Zl = (L * (cos(thetaRad) + cos(alphaRad))) + K;
+    P.x = L * (sin(thetaRad) - sin(alphaRad));
+    P.y = Zl * sin(gammaRad);
+    P.z = Zl * cos(gammaRad);  
+    return P;
+  }
+
+  bool outLimitsR(float kneeAngle, float footAngle, float hipAngle, float ankleAngle) {
+    if (right_hip.outLimit(hipAngle) || right_knee.outLimit(kneeAngle) || right_foot.outLimit(footAngle) || right_ankle.outLimit(ankleAngle)) {
+      return true;
+    }
+    return false;
+  }
+  bool outLimitsL(float kneeAngle, float footAngle, float hipAngle, float ankleAngle) {
+    if (left_hip.outLimit(hipAngle) || left_knee.outLimit(kneeAngle) || left_foot.outLimit(footAngle) || left_ankle.outLimit(ankleAngle)) {
+      return true;
+    }
+    return false;
+  }
+
   bool setRightFoot(Point P) {
     float kneeAngle;
     float footAngle;
     float hipAngle;
     if (!IK_CalAngle(P, kneeAngle, footAngle, hipAngle)){
+      Serial.println("sRF-IK failed");
+      return false;
+    } 
+    float ankleAngle = hipAngle;
+    if (outLimitsR(kneeAngle, footAngle, hipAngle, ankleAngle)) {
       return false;
     }
-    float ankleAngle = hipAngle;
     if (!right_knee.setJointAngle(kneeAngle) || !right_foot.setJointAngle(footAngle) || !right_hip.setJointAngle(hipAngle) || !right_ankle.setJointAngle(ankleAngle)){
       return false;
     }
@@ -112,9 +155,13 @@ private:
     float footAngle;
     float hipAngle;
     if (!IK_CalAngle(P, kneeAngle, footAngle, hipAngle)){
+      Serial.println("sLF-IK failed");
       return false;
     }
     float ankleAngle = hipAngle;
+    if (outLimitsL(kneeAngle, footAngle, hipAngle, ankleAngle)) {
+      return false;
+    }
     if (!left_knee.setJointAngle(kneeAngle) || !left_foot.setJointAngle(footAngle) || !left_hip.setJointAngle(hipAngle) || !left_ankle.setJointAngle(ankleAngle)){
       return false;
     }
@@ -123,7 +170,6 @@ private:
 
   bool getDeltaPoint(unsigned long startTime, unsigned long totalTime, unsigned long deltaTime, Point startPoint, Point endPoint, Point &deltaPoint) {
     if (deltaTime >= totalTime) {
-      // Serial.println("getDeltaPoint : deltaTime > totalTime");
       deltaPoint = endPoint;    
       return true;
     }
@@ -138,27 +184,33 @@ private:
     }
   }
 
+  float pointDistance(Point p1, Point p2) {
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+    float dz = p2.z - p1.z;
+    return sqrt(dx * dx + dy * dy + dz * dz);
+  }
 public:
 
   body() :
-    right_knee(rightKneePin,rightKneeNormal,rightKneeMin,rightKneeMax,true),
-    left_knee(leftKneePin,leftKneeNormal,leftKneeMin,leftKneeMax,false),
-    right_foot(rightFootPin,rightFootNormal,rightFootMin,rightFootMax,false),
-    left_foot(leftFootPin,leftFootNormal,leftFootMin,leftFootMax,true),
-    right_hip(rightHipPin,rightHipNormal,rightHipMin,rightHipMax,false),
-    left_hip(leftHipPin,leftHipNormal,leftHipMin,leftHipMax,true),
-    hip(HipPin,HipNormal,HipMin,HipMax,false),
+    right_knee(rightKneePin,rightKneeNormal,rightKneeMin,rightKneeMax,true, rightKneeName),
+    left_knee(leftKneePin,leftKneeNormal,leftKneeMin,leftKneeMax,false, leftKneeName),
+    right_foot(rightFootPin,rightFootNormal,rightFootMin,rightFootMax,false, rightFootName),
+    left_foot(leftFootPin,leftFootNormal,leftFootMin,leftFootMax,true, leftFootName),
+    right_hip(rightHipPin,rightHipNormal,rightHipMin,rightHipMax,false, rightHipName),
+    left_hip(leftHipPin,leftHipNormal,leftHipMin,leftHipMax,true, leftHipName),
+    hip(HipPin,HipNormal,HipMin,HipMax,false, hipName),
 
-    left_shoulderA(leftShoulderAPin,leftShoulderANormal,leftShoulderAMin,leftShoulderAMax,true),
-    right_shoulderA(rightShoulderAPin,rightShoulderANormal,rightShoulderAMin,rightShoulderAMax,false),
-    
-    left_shoulderB(leftShoulderBPin,leftShoulderBNormal,leftShoulderBMin,leftShoulderBMax,false),
-    right_shoulderB(rightShoulderBPin,rightShoulderBNormal,rightShoulderBMin,rightShoulderBMax,true),
-    
-    left_elbow(leftElbowPin,leftElbowNormal,leftElbowMin,leftElbowMax,false),
-    right_elbow(rightElbowPin,rightElbowNormal,rightElbowMin,rightElbowMax,true),
-    left_ankle(leftAnklePin,leftAnkleNormal,leftAnkleMin,leftAnkleMax,true),
-    right_ankle(rightAnklePin,rightAnkleNormal,rightAnkleMin,rightAnkleMax,false)
+    left_shoulderA(leftShoulderAPin,leftShoulderANormal,leftShoulderAMin,leftShoulderAMax,true, leftShoulderAName),
+    right_shoulderA(rightShoulderAPin,rightShoulderANormal,rightShoulderAMin,rightShoulderAMax,false, rightShoulderAName),
+
+    left_shoulderB(leftShoulderBPin,leftShoulderBNormal,leftShoulderBMin,leftShoulderBMax,false, leftShoulderBName),
+    right_shoulderB(rightShoulderBPin,rightShoulderBNormal,rightShoulderBMin,rightShoulderBMax,true, rightShoulderBName),
+
+    left_elbow(leftElbowPin,leftElbowNormal,leftElbowMin,leftElbowMax,false, leftElbowName),
+    right_elbow(rightElbowPin,rightElbowNormal,rightElbowMin,rightElbowMax,true, rightElbowName),
+    left_ankle(leftAnklePin,leftAnkleNormal,leftAnkleMin,leftAnkleMax,true, leftAnkleName),
+    right_ankle(rightAnklePin,rightAnkleNormal,rightAnkleMin,rightAnkleMax,false, rightAnkleName)
   {}
 
   bool setup() {
@@ -210,14 +262,9 @@ public:
     unsigned long t1 = (totalTime - t2)/2;
     unsigned long t3 = t1;
     
-
-    setRightFoot(B);
-    setLeftFoot(C);
+    statue(B, C, 2000);
 
     for (cycle = 1; cycle <= cycles; cycle++) {
-      Serial.print("---------------");
-      Serial.print(cycle);
-      Serial.println("---------------");
       char rightLegStage = 'B';
       setRightFoot(B);
       Point rightLegPoint = B;
@@ -250,8 +297,6 @@ public:
           break;
         }
         
-        // Serial.print(" RFS:" + String(rightLegStage) + " LFS:" + String(leftLegStage));
-
         if (rightLegStage == 'A') {
           if (rightLegMovementDone) {
             AtB_StartingTimeR = currentTime;
@@ -295,8 +340,6 @@ public:
           }
         }
         
-        // Serial.print(" RFS:" + String(rightLegStage) + " LFS:" + String(leftLegStage));
-
         if (leftLegStage == 'A') {
           if (leftLegMovementDone) {
             AtB_StartingTimeL = currentTime;
@@ -344,27 +387,88 @@ public:
     return true;  
   }
 
-  bool statue() {
-    Point R = {5, 0, 110};
-    Point L = {5, 0, 90};
-    float theta, alpha, gamma;
-    if (!IK_CalAngle(R, theta, alpha, gamma) || !IK_CalAngle(L, theta, alpha, gamma)) {
-      Serial.println("statu: IK_CalAngle failed.");
-      return false;
-    }
-    Serial.println(String("Angles for position " + String(R.x) + ", " + String(R.y) + ", " + String(R.z) + " are:" + String(theta) + ", " + String(alpha) + ", " + String(gamma)));
-    if (!setRightFoot(R) || !setLeftFoot(L) || !hip.setJointAngle(0) || !left_shoulderA.setJointAngle(0) || !right_shoulderA.setJointAngle(0) || !left_shoulderB.setJointAngle(90) || !right_shoulderB.setJointAngle(90) || !left_elbow.setJointAngle(0) || !right_elbow.setJointAngle(0)) {
-      return false;
+  bool statue(Point RightFoot = {5, -10, 110}, Point LeftFoot = {5, -10, 110}, float time = 2000) {
+    Point Rt = RightFoot;
+    Point Lt = LeftFoot;
+    Point Rs = getRightFoot();
+    Point Ls = getLeftFoot();
+    Point Rd;
+    Point Ld;
+    float rTheta, lTheta, rAlpha, lAlpha, rGamma, lGamma;
+
+    unsigned long startTime = millis();
+    while (true) {
+      unsigned long currentTime = millis();
+      unsigned long deltaTime = currentTime - startTime;
+      if (currentTime - startTime >= time) {
+        break;
+      }
+      getDeltaPoint(startTime, time, deltaTime, Rs, Rt, Rd);
+      getDeltaPoint(startTime, time, deltaTime, Ls, Lt, Ld);
+      if (!IK_CalAngle(Rd, rTheta, rAlpha, rGamma) || !IK_CalAngle(Ld, lTheta, lAlpha, lGamma)) {
+        return false;
+      }
+      if (!setRightFoot(Rd) || !setLeftFoot(Ld) || !hip.setJointAngle(0) || !left_shoulderA.setJointAngle(0) || !right_shoulderA.setJointAngle(0) || !left_shoulderB.setJointAngle(90) || !right_shoulderB.setJointAngle(90) || !left_elbow.setJointAngle(0) || !right_elbow.setJointAngle(0)) {
+        return false;
+      }
     }
     return true;
   }
 
-  bool setJoints(Point rightFoot, Point leftFoot, float hipAngle, float leftShoulderA, float rightShoulderA, float leftShoulderB, float rightShoulderB, float leftElbow, float rightElbow) {
+  bool setLegs(float values[22]) {
+    Point rightFoot = {values[0], values[1], values[2]};
+    Point leftFoot = {values[3], values[4], values[5]};
+    float hipAngle = values[6];
+    float leftShoulderA = values[7];
+    float rightShoulderA = values[8];
+    float leftShoulderB = values[9];
+    float rightShoulderB = values[10];
+    float leftElbow = values[11];
+    float rightElbow = values[12];
+    
     if (!setRightFoot(rightFoot) || !setLeftFoot(leftFoot) || !hip.setJointAngle(hipAngle) || !left_shoulderA.setJointAngle(leftShoulderA) || !right_shoulderA.setJointAngle(rightShoulderA) || !left_shoulderB.setJointAngle(leftShoulderB) || !right_shoulderB.setJointAngle(rightShoulderB) || !left_elbow.setJointAngle(leftElbow) || !right_elbow.setJointAngle(rightElbow)) {
       return false;
     }
     return true;
   }
-};
 
+  bool setJoints(float values[9]) {//15
+    float hipAngle = values[0];
+    float rightHip = values[1];
+    float leftHip = values[2];
+    float rightKnee = values[3];
+    float leftKnee = values[4];
+    float rightFoot = values[5];
+    float leftFoot = values[6];
+    float rightAnkle = values[7];
+    float leftAnkle = values[8];
+
+    if (!right_knee.setJointAngle(rightKnee) || !left_knee.setJointAngle(leftKnee) || !right_foot.setJointAngle(rightFoot) || !left_foot.setJointAngle(leftFoot) || !right_hip.setJointAngle(rightHip) || !left_hip.setJointAngle(leftHip) || !hip.setJointAngle(hipAngle) || !left_ankle.setJointAngle(leftAnkle) || !right_ankle.setJointAngle(rightAnkle)) {
+      return false;
+    }
+    return true;
+  }
+  
+  bool setFoots(Point R, Point L) {
+    if (setRightFoot(R)) {
+      if (setLeftFoot(L)) {
+        return true;
+      }
+      Serial.println("setLeftFoot failed");
+      return false;
+    }
+    Serial.println("setRightFoot failed");
+    return false;
+  }
+
+  Point getRightFoot() {
+    Point P = FK_CalPoint(right_knee.getJointAngle(), right_foot.getJointAngle(), right_hip.getJointAngle());
+    return P;
+  }
+
+  Point getLeftFoot() {
+    Point P = FK_CalPoint(left_knee.getJointAngle(), left_foot.getJointAngle(), left_hip.getJointAngle());
+    return P;
+  }
+};
 #endif
