@@ -36,7 +36,7 @@ private:
   const int rightKneePin = 9, rightKneeNormal = 92, rightKneeMin = -35, rightKneeMax = 35;
   const int leftKneePin = 8, leftKneeNormal = 68, leftKneeMin = -35, leftKneeMax = 35;
   const int rightFootPin = 7, rightFootNormal = 94, rightFootMin = -35, rightFootMax = 35;
-  const int leftFootPin = 6, leftFootNormal = 100, leftFootMin = -35, leftFootMax = 35;
+  const int leftFootPin = 6, leftFootNormal = 113, leftFootMin = -35, leftFootMax = 35;
   
   const int rightHipPin = 11, rightHipNormal = 90, rightHipMin = -25, rightHipMax = 15;
   const int leftHipPin = 10, leftHipNormal = 70, leftHipMin = -25, leftHipMax = 15;
@@ -297,7 +297,7 @@ public:
       if (!IK_CalAngle(Rd, rTheta, rAlpha, rGamma) || !IK_CalAngle(Ld, lTheta, lAlpha, lGamma)) {
         return false;
       }
-      if (!setRightFoot(Rd) || !setLeftFoot(Ld) || !hip.setJointAngle(0) || !left_shoulderA.setJointAngle(0) || !right_shoulderA.setJointAngle(0) || !left_shoulderB.setJointAngle(90) || !right_shoulderB.setJointAngle(90) || !left_elbow.setJointAngle(0) || !right_elbow.setJointAngle(0)) {
+      if (!setRightFoot(Rd) || !setLeftFoot(Ld)) {
         return false;
       }
     }
@@ -391,6 +391,48 @@ public:
     // Serial.println(left_ankle.getJointAngle());
         
   }
+
+  bool turn(int cycles, unsigned long totalTime, char dir) {
+    
+    left_shoulderB.setJointAngle(90);
+    right_shoulderB.setJointAngle(90);
+
+    Point S(0,0,105);
+    Point D(0,-45,96.5);
+    Point G(0,41,110);
+
+    float angle;
+    if (dir == 'L') {
+      angle = 10;
+    }
+    else if (dir == 'R') {
+      angle = -10;
+    }
+    else {
+      Serial.println("Dir Unknown");
+      return false;
+    }
+
+    unsigned long t1 = totalTime;
+
+    for (int cycle = 1; cycle <= cycles; cycle++) {
+      Serial.println("Start");
+
+      statue(G,D,t1);
+      hip.setJointAngleAndTime(angle,1000);
+      statue(S,S,t1);
+      statue(D,G,t1);
+      hip.setJointAngleAndTime(-angle,1000);
+      statue(S,S,t1);
+
+      Serial.print(cycle);
+      Serial.println(" Over");
+    }
+    hip.setJointAngleAndTime(0,1000);
+    statue(S, S, 1000);
+    return true;
+  }
+
 };
 
 #endif

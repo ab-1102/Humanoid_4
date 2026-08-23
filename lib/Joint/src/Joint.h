@@ -106,6 +106,27 @@ public:
     }
     return false;
   }
+
+  bool setJointAngleAndTime(float angle, unsigned long time) {
+    unsigned long startTime = millis();
+    float startAngle = getJointAngle();
+    float speed = (angle-startAngle)/time; 
+    unsigned long previousTime = startTime;
+
+    while (true) {
+      unsigned long currentTime = millis();
+      unsigned long deltaTime = currentTime - previousTime;
+      float setAngle = getJointAngle() + (speed*deltaTime);
+      if ((currentTime-startTime) >= time) {
+        return true;
+      }
+      setJointAngle(setAngle);
+      previousTime = currentTime;
+      delay(50);
+    }
+    return true;
+  }
+
 };
 
 #endif

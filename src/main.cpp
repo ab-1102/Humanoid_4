@@ -182,6 +182,16 @@ void executeCommand(const char* action,
     humanoid.walk(steps,1500);
     return;
   }
+  
+  if (action[0] == 'T' && (action[1] == 'L' || action[1] == 'R')) {
+    int steps = round(angle);
+    Serial.print("Turning in ");
+    Serial.print(action[1]);
+    Serial.println(" direction");
+    humanoid.turn(steps,1500,action[1]);
+
+  }
+  
   Serial.print("ERROR: Unknown action ");
   Serial.println(action);
   Serial.println("END");
