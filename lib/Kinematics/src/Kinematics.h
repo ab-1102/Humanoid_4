@@ -38,21 +38,22 @@ private:
   const int rightFootPin = 7, rightFootNormal = 94, rightFootMin = -35, rightFootMax = 35;
   const int leftFootPin = 6, leftFootNormal = 113, leftFootMin = -35, leftFootMax = 35;
   
-  const int rightHipPin = 11, rightHipNormal = 90, rightHipMin = -25, rightHipMax = 15;
+  const int rightHipPin = 11, rightHipNormal = 89, rightHipMin = -25, rightHipMax = 15;
   const int leftHipPin = 10, leftHipNormal = 70, leftHipMin = -25, leftHipMax = 15;
   const int HipPin = 12, HipNormal = 90, HipMin = -20, HipMax = 20;
   
   const int leftShoulderAPin = 14, leftShoulderANormal = 89, leftShoulderAMin = -90, leftShoulderAMax = 90;
   const int rightShoulderAPin = 15, rightShoulderANormal = 90, rightShoulderAMin = -90, rightShoulderAMax = 90;
   
-  const int rightShoulderBPin = 16, rightShoulderBNormal = 90, rightShoulderBMin = -90, rightShoulderBMax = 90;
+  const int rightShoulderBPin = 16, rightShoulderBNormal = 88, rightShoulderBMin = -90, rightShoulderBMax = 90;
   const int leftShoulderBPin = 17, leftShoulderBNormal = 91, leftShoulderBMin = -90, leftShoulderBMax = 90;
   
   const int rightElbowPin = 18, rightElbowNormal = 90, rightElbowMin = -90, rightElbowMax = 90;
   const int leftElbowPin = 19, leftElbowNormal = 90, leftElbowMin = -90, leftElbowMax = 90;
   
-  const int rightAnklePin = 4, rightAnkleNormal = 92, rightAnkleMin = -15, rightAnkleMax = 30;
-  const int leftAnklePin = 5, leftAnkleNormal = 82, leftAnkleMin = -15, leftAnkleMax = 30;
+  const int rightAnklePin = 5, rightAnkleNormal = 74, rightAnkleMin = -15, rightAnkleMax = 30;
+  const int leftAnklePin = 4, leftAnkleNormal = 84, leftAnkleMin = -15, leftAnkleMax = 30;
+  const int headPin = 3, headNormal = 85, headMin = -90, headMax = 90;
   
   String rightKneeName = "RK";
   String leftKneeName = "LK";
@@ -69,6 +70,7 @@ private:
   String rightElbowName = "LE";
   String leftAnkleName = "LA";
   String rightAnkleName = "RA";
+  String headName = "HE";
 
   joint right_knee; 
   joint left_knee; 
@@ -92,6 +94,8 @@ private:
 
   joint left_ankle;
   joint right_ankle;
+
+  joint head;
 
   bool rightLegMovementDone;
   bool leftLegMovementDone;
@@ -216,7 +220,8 @@ public:
     left_elbow(leftElbowPin,leftElbowNormal,leftElbowMin,leftElbowMax,false, leftElbowName),
     right_elbow(rightElbowPin,rightElbowNormal,rightElbowMin,rightElbowMax,true, rightElbowName),
     left_ankle(leftAnklePin,leftAnkleNormal,leftAnkleMin,leftAnkleMax,true, leftAnkleName),
-    right_ankle(rightAnklePin,rightAnkleNormal,rightAnkleMin,rightAnkleMax,false, rightAnkleName)
+    right_ankle(rightAnklePin,rightAnkleNormal,rightAnkleMin,rightAnkleMax,false, rightAnkleName),
+    head(headPin,headNormal,headMin,headMax,false,headName)
   {}
 
   bool setup() {
@@ -235,6 +240,7 @@ public:
     right_elbow.begin();
     left_ankle.begin();
     right_ankle.begin();
+    head.begin();
     return true;
   }
 
@@ -403,10 +409,10 @@ public:
 
     float angle;
     if (dir == 'L') {
-      angle = 10;
+      angle = 20;
     }
     else if (dir == 'R') {
-      angle = -10;
+      angle = -20;
     }
     else {
       Serial.println("Dir Unknown");
